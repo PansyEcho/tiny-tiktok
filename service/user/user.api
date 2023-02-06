@@ -1,0 +1,93 @@
+syntax = "v1"
+
+info(
+	title: "UserApi"
+	desc: "用户模块"
+	author: "shizhen"
+	data: "2023/2/6"
+)
+
+//用户账号
+type UserAccount {
+	Username string `form:"username"`
+	Password string `form:"password"`
+}
+
+//响应码及信息
+type Status {
+	Status_code int32  `json:"status_code"`
+	Status_msg  string `json:"status_msg "`
+}
+
+//用户ID和token
+type UserToken {
+	UserID int64  `json:"user_id "`
+	Token  string `json:"token"`
+}
+
+//用户信息请求
+type UserInfoWithToken {
+	UserID int64  `form:"user_id "`
+	Token  string `form:"token"`
+}
+
+//用户个人信息
+type User {
+	UserID        int64  `json:"id"`
+	Username      string `json:"name"`
+	FollowCount   int64  `json:"follow_count"`
+	FollowerCount int64  `json:"follower_count"`
+	IsFollow      bool   `json:"is_follow"`
+}
+
+// 注册
+type (
+	RegisterReq {
+		UserAccount
+	}
+	RegisterResp {
+		Status
+		UserToken
+	}
+)
+
+// 登录
+type (
+	LoginReq {
+		UserAccount
+	}
+	LoginResp {
+		Status
+		UserToken
+	}
+)
+
+// 查看用户信息
+type (
+	UserInfoReq {
+		UserInfoWithToken
+	}
+	UserInfoResp {
+		Status
+		User *User `json:"user,omitempty"`
+	}
+)
+
+@server(
+	group : user
+	prefix : /douyin/user
+)
+service user-api {
+	@doc "用户注册"
+	@handler RegisterHandler
+	post /register (RegisterReq) returns(RegisterResp)
+	
+	@doc "用户登录"
+	@handler LoginHandler
+	post /login (LoginReq) returns(LoginResp)
+	
+	@doc "获取用户信息"
+	@handler UserInfo
+	post / (UserInfoReq) returns(UserInfoResp)
+	
+}

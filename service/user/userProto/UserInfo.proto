@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package ="./userProto";
+
+package userProto;
+
+// ------------------------------------
+// Messages
+// ------------------------------------
+
+message User {
+  int64 userId = 1; //userId
+  string userName = 2; //name
+  int64 followCount = 3; //followCount
+  int64 followerCount = 4; //followerCount
+}
+
+message UserInfoReq {
+  int64 userId = 1; //userId
+  string token = 2;
+}
+
+message UserInfoResp {
+  User user = 1;
+}
+
+
+
+
+service UserInfoService{
+  //-----------------------user-----------------------
+  rpc Info(UserInfoReq) returns (UserInfoResp);
+}

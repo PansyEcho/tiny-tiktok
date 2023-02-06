@@ -1,0 +1,55 @@
+syntax = "v1"
+
+info(
+	title: "UserApi"
+	desc: "用户模块"
+	author: "shizhen"
+	data: "2023/2/6"
+)
+
+//响应码及信息
+type Status {
+	Status_code int32  `json:"status_code"`
+	Status_msg  string `json:"status_msg "`
+}
+
+//用户个人信息
+type User {
+	UserID        int64  `json:"id"`
+	Username      string `json:"name"`
+	FollowCount   int64  `json:"follow_count"`
+	FollowerCount int64  `json:"follower_count"`
+	IsFollow      bool   `json:"is_follow"`
+}
+
+type Video {
+	Id            int64  `json:"id"`
+	User          User   `json:"author"`
+	PlayURL       string `json:"play_url"`
+	CoverURL      string `json:"cover_url"`
+	FavoriteCount int64  `json:"favorite_count"`
+	CommentCount  int64  `json:"comment_count"`
+	IsFavorite    bool   `json:"is_favorite"`
+	Title         string `json:"title"`
+}
+
+// 获取视频Feed流请求
+type FeedReq {
+	Token    string `form:"token,optional"`
+	LastTime int64  `form:"last_time,optional"`
+}
+
+// 获取视频Feed流响应
+type FeedResp {
+	Status
+	NextTime int64    `json:"next_time,omitempty"`
+	Video    []*Video `json:"video_list,omitempty"`
+}
+@server(
+	prefix : /douyin/
+)
+service video-api {
+	@doc "获取视频Feed流"
+	@handler Feed
+	get /feed (FeedReq) returns (FeedResp)
+}
