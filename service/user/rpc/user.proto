@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package ="./userProto";
+option go_package ="./user";
 
 package userProto;
 
@@ -13,6 +13,7 @@ message User {
   string userName = 2; //name
   int64 followCount = 3; //followCount
   int64 followerCount = 4; //followerCount
+  bool isFollow = 5;
 }
 
 message UserInfoReq {
@@ -24,10 +25,26 @@ message UserInfoResp {
   User user = 1;
 }
 
+message UpdateActivityReq {
+  string token = 1;
+  int64 value = 2;
+}
 
+message UpdateActivityResp {
+  int64 code = 1;
+  string msg = 2;
+}
+message GetActivityReq {
+  string token = 1;
+}
 
+message GetActivityResp {
+  int64 value = 1;
+}
 
 service UserInfoService{
   //-----------------------user-----------------------
   rpc Info(UserInfoReq) returns (UserInfoResp);
+  rpc AddActivity(UpdateActivityReq) returns (UpdateActivityResp);
+  rpc GetActivity(GetActivityReq) returns (GetActivityResp);
 }

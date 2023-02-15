@@ -43,6 +43,7 @@ func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterRe
 		Password:       utils.Md5(req.Password),
 		Follow_count:   0,
 		Follower_count: 0,
+		Activity:       0,
 	}
 
 	result = l.svcCtx.DB.Create(&user)

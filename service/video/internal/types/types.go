@@ -35,3 +35,12 @@ type FeedResp struct {
 	NextTime int64    `json:"next_time,omitempty"`
 	Video    []*Video `json:"video_list,omitempty"`
 }
+
+type PublishVideoReq struct {
+	Token string `form:"token"`
+	Title string `form:"title"`
+}
+
+type PublishVideoResp struct {
+	Status
+}

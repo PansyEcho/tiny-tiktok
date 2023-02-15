@@ -17,6 +17,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/feed",
 				Handler: FeedHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/publish/action",
+				Handler: PubVideoHandler(serverCtx),
+			},
 		},
 		rest.WithPrefix("/douyin"),
 	)

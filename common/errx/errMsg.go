@@ -13,6 +13,9 @@ func init() {
 	message[PASSWORD_ERROR] = "密码错误 "
 	message[REDIS_ERROR] = "redis发生错误 "
 	message[NOT_USER_ERROR] = "未知用户 "
+	message[NOT_TOKEN_ERROR] = "未携带Token "
+	message[UPDATE_ACTIVITY_ERROR] = "更新用户活跃度失败 "
+	message[WRONG_DATA_ERROR] = "错误的视频数据 "
 }
 
 func MapErrMsg(errcode int32) string {

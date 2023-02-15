@@ -45,6 +45,17 @@ type FeedResp {
 	NextTime int64    `json:"next_time,omitempty"`
 	Video    []*Video `json:"video_list,omitempty"`
 }
+
+type (
+	PublishVideoReq {
+		Token string `form:"token"`
+		Title string `form:"title"`
+	}
+	PublishVideoResp {
+		Status
+	}
+)
+
 @server(
 	prefix : /douyin/
 )
@@ -52,4 +63,9 @@ service video-api {
 	@doc "获取视频Feed流"
 	@handler Feed
 	get /feed (FeedReq) returns (FeedResp)
+	
+	@doc "发布视频"
+	@handler PubVideo
+	post /publish/action (PublishVideoReq) returns (PublishVideoResp)
+	
 }

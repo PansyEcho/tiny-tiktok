@@ -1,0 +1,11 @@
+Name: user.rpc
+ListenOn: 0.0.0.0:8080
+Etcd:
+  Hosts:
+  - 43.139.184.22:2379
+  Key: user.rpc
+
+RedisCacheConf:
+  Host: 43.139.184.22:6379
+  Pass: shi
+  Type: node
