@@ -13,10 +13,47 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				Method:  http.MethodGet,
-				Path:    "/hello",
-				Handler: InteractionHandler(serverCtx),
+				Method:  http.MethodPost,
+				Path:    "/favorite/action",
+				Handler: FavoriteHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/comment/action",
+				Handler: CommentHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/relation/action",
+				Handler: FollowHandler(serverCtx),
 			},
 		},
+		rest.WithPrefix("/douyin"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/favorite/list",
+				Handler: FavoriteListHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/comment/list",
+				Handler: CommentListHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/relation/follow/list",
+				Handler: FollowListHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/relation/follower/list",
+				Handler: FollowerListHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/douyin"),
 	)
 }

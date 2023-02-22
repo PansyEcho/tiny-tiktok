@@ -39,11 +39,17 @@ func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterRe
 	}
 
 	user = &model.User{
-		Username:       req.Username,
-		Password:       utils.Md5(req.Password),
-		Follow_count:   0,
-		Follower_count: 0,
-		Activity:       0,
+		Username:        req.Username,
+		Password:        utils.Md5(req.Password),
+		Follow_count:    0,
+		Follower_count:  0,
+		Activity:        0,
+		Avatar:          constant.DEFAULT_AVATAR_ADDRESS,
+		BackgroundImage: constant.DEFAULT_BACKGROUND_ADDRESS,
+		Signature:       "欢迎来到我的主页",
+		TotalFavorited:  "0",
+		WorkCount:       0,
+		FavoriteCount:   0,
 	}
 
 	result = l.svcCtx.DB.Create(&user)

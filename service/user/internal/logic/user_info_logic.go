@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"tiny-tiktok/common/errx"
 	"tiny-tiktok/common/utils"
@@ -40,27 +39,51 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 		userinfoCode(errx.TOKEN_EXPIRE_ERROR, resp, err)
 		return
 	}
+
+	if req.UserID == 0 {
+		req.UserID = userClaim.Id
+	}
+
 	user := new(model.User)
-	find := l.svcCtx.DB.Where("id = ?", userClaim.Id).Limit(1).Find(&user)
-	if find.RowsAffected == 0 {
-		resp.Status = types.Status{Status_code: errx.NOT_USER_ERROR, Status_msg: errx.MapErrMsg(errx.NOT_USER_ERROR)}
-		return
+	find := l.svcCtx.DB.Where("id = ?", req.UserID).Limit(1).Find(&user)
+	if find.Error != nil || find.RowsAffected == 0 {
+		return &types.UserInfoResp{
+			Status: types.Status{
+				Status_code: errx.DB_ERROR,
+				Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+			},
+		}, nil
 	}
+
 	follow := new(model.Follow)
-	find = l.svcCtx.DB.Where("user_id = ? and follow_id = ? ").Limit(1).Find(&follow)
-	userResp := new(types.User)
-	err = copier.Copy(userResp, user)
-	if err != nil {
-		userinfoCode(errx.ERROR, resp, err)
-		return
+	find = l.svcCtx.DB.Where("user_id = ? and follow_id = ? ", userClaim.Id, user.ID).Limit(1).Find(&follow)
+	if find.Error != nil {
+		return &types.UserInfoResp{
+			Status: types.Status{
+				Status_code: errx.DB_ERROR,
+				Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+			},
+		}, nil
 	}
-
-	if find.RowsAffected > 0 && follow.Cancel == 1 {
-		userResp.IsFollow = false
-	}
-
-	succeedUserInfo(userResp, resp)
-	return
+	return &types.UserInfoResp{
+		Status: types.Status{
+			Status_code: errx.SUCCEED,
+			Status_msg:  errx.MapErrMsg(errx.SUCCEED),
+		},
+		User: &types.User{
+			UserID:          user.ID,
+			Username:        user.Username,
+			FollowCount:     user.Follow_count,
+			FollowerCount:   user.Follower_count,
+			IsFollow:        find.RowsAffected == 1,
+			Avatar:          user.Avatar,
+			BackgroundImage: user.BackgroundImage,
+			Signature:       user.Signature,
+			TotalFavorited:  user.TotalFavorited,
+			WorkCount:       user.WorkCount,
+			FavoriteCount:   user.FavoriteCount,
+		},
+	}, nil
 }
 
 func succeedUserInfo(user *types.User, resp *types.UserInfoResp) {

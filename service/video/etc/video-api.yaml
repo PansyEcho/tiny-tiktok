@@ -1,7 +1,19 @@
 Name: video-api
 Host: 0.0.0.0
-Port: 8888
+Port: 13000
+MaxRequestSize: 102400000
+MaxMultipartMemory: 102400000
+MaxBytes: 102400000
 
 RedisCacheConf:
   Host: 43.139.184.22:6379
   Pass: shi
+
+
+COSConf:
+  SecretId: AKIDiLm24sSqFRSK1VotpY5OYZNyKKBpEVZ5
+  SecretKey: OgrtmaFmCRTNBnZBcswnYIxQinfKnUzE
+  MachineId: 1
+  VideoBucket: https://tiny-tiktok-1315177920.cos.ap-nanjing.myqcloud.com
+  CoverBucket: https://tiny-tiktok-1315177920.cos.ap-nanjing.myqcloud.com
+  CommentBucket: https://tiny-tiktok-1315177920.cos.ap-nanjing.myqcloud.com

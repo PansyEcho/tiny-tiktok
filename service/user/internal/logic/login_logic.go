@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"github.com/pkg/errors"
 	"strconv"
 	"tiny-tiktok/common/constant"
@@ -49,6 +50,7 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginResp, err erro
 		return
 	}
 	returnToken(errx.SUCCEED, resp, token, user.ID)
+	fmt.Println("登录成功....")
 	return
 }
 

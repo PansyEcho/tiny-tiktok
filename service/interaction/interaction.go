@@ -3,13 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-
+	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/rest"
 	"tiny-tiktok/service/interaction/internal/config"
 	"tiny-tiktok/service/interaction/internal/handler"
 	"tiny-tiktok/service/interaction/internal/svc"
-
-	"github.com/zeromicro/go-zero/core/conf"
-	"github.com/zeromicro/go-zero/rest"
 )
 
 var configFile = flag.String("f", "etc/interaction-api.yaml", "the config file")
@@ -28,4 +26,5 @@ func main() {
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
+	//model.NewDB()
 }

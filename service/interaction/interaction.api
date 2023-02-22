@@ -1,11 +1,153 @@
-type Request {
+syntax = "v1"
+
+//响应码及信息
+type Status {
+	Status_code int32  `json:"status_code"`
+	Status_msg  string `json:"status_msg "`
 }
 
-type Response {
-	Message string `json:"message"`
+type User {
+	UserID          int64  `json:"id"`
+	Username        string `json:"name"`
+	FollowCount     int64  `json:"follow_count"`
+	FollowerCount   int64  `json:"follower_count"`
+	IsFollow        bool   `json:"is_follow"`
+	Avatar          string `json:"avatar"`
+	BackgroundImage string `json:"background_image"`
+	Signature       string `json:"signature"`
+	TotalFavorited  string `json:"total_favorited"`
+	WorkCount       int    `json:"work_count"`
+	FavoriteCount   int    `json:"favorite_count"`
 }
 
-service interaction-api {
-	@handler InteractionHandler
-	get /hello () returns (Response)
+type FavoriteReq {
+	Token      string `form:"token"`
+	VideoId    int64  `form:"video_id"`
+	ActionType int64  `form:"action_type"`
+}
+
+type FavoriteResp {
+	Status
+}
+
+type FollowReq {
+	Token      string `form:"token"`
+	FollowId   int64  `form:"to_user_id"`
+	ActionType int64  `form:"action_type"`
+}
+
+type FollowResp {
+	Status
+}
+
+type CommentReq {
+	Token       string `form:"token"`
+	VideoId     int64  `form:"video_id"`
+	ActionType  int64  `form:"action_type"`
+	CommentText string `form:"comment_text,omitempty, optional"`
+	CommentId   int64  `form:"comment_id,omitempty, optional"`
+}
+
+type Comment {
+	CommentId  int64  `json:"id" copyier:"id"`
+	User       User   `json:"user"`
+	Content    string `json:"content"`
+	CreateTime string `json:"create_date"`
+}
+
+type CommentResp {
+	Status
+	Comment *Comment `json:"comment,omitempty"`
+}
+
+@server(
+	prefix : /douyin
+)
+
+service user-api {
+	@doc "用户点赞"
+	@handler FavoriteHandler
+	post /favorite/action (FavoriteReq) returns (FavoriteResp)
+	
+	@doc "用户评论"
+	@handler CommentHandler
+	post /comment/action (CommentReq) returns (CommentResp)
+	
+	@doc "用户关注"
+	@handler FollowHandler
+	post /relation/action (FollowReq) returns (FollowResp)
+}
+
+type TokenIDReq {
+	Token  string `form:"token"`
+	UserId int64  `form:"user_id"`
+}
+
+type FavoriteListReq {
+	TokenIDReq
+}
+
+type Video {
+	Id            int64  `json:"id"`
+	User          User   `json:"author"`
+	PlayURL       string `json:"play_url"`
+	CoverURL      string `json:"cover_url"`
+	FavoriteCount int64  `json:"favorite_count"`
+	CommentCount  int64  `json:"comment_count"`
+	IsFavorite    bool   `json:"is_favorite"`
+	Title         string `json:"title"`
+}
+
+type FavoriteListResp {
+	Status
+	FavoriteList []*Video `json:"video_list,omitempty"`
+}
+
+type FollowListReq {
+	TokenIDReq
+}
+
+type FollowListResp {
+	Status
+	UserFollowlist []*User `json:"user_list,omitempty"`
+}
+
+type FollowerListReq {
+	TokenIDReq
+}
+
+type FollowerListResp {
+	Status
+	UserFollowerlist []*User `json:"user_list,omitempty"`
+}
+
+type CommentListReq {
+	Token   string `form:"token"`
+	VideoId int64  `form:"video_id"`
+}
+
+type CommentListResp {
+	Status
+	CommentList []*Comment `json:"comment_list,omitempty"`
+}
+
+@server(
+	prefix : /douyin
+)
+service user-api {
+	@doc "用户点赞列表"
+	@handler FavoriteList
+	get /favorite/list (FavoriteListReq) returns (FavoriteListResp)
+	
+	@doc "视频评论列表"
+	@handler CommentList
+	get /comment/list (CommentListReq) returns (CommentListResp)
+	
+	@doc "用户关注列表"
+	@handler FollowList
+	get /relation/follow/list (FollowListReq) returns (FollowListResp)
+	
+	@doc "用户粉丝列表"
+	@handler FollowerList
+	get /relation/follower/list (FollowerListReq) returns (FollowerListResp)
 }

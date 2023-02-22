@@ -1,9 +1,13 @@
 Name: interaction-api
 Host: 0.0.0.0
-Port: 8889
+Port: 14000
 
 UserRpc:
   Etcd:
     Hosts:
       - 43.139.184.22:2379
     Key: user.rpc
+
+RedisCacheConf:
+  Host: 43.139.184.22:6379
+  Pass: shi

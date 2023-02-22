@@ -16,6 +16,10 @@ func init() {
 	message[NOT_TOKEN_ERROR] = "未携带Token "
 	message[UPDATE_ACTIVITY_ERROR] = "更新用户活跃度失败 "
 	message[WRONG_DATA_ERROR] = "错误的视频数据 "
+	message[UPLOAD_VIDEO_ERROR] = "上传视频失败 "
+	message[UPLOAD_COVER_ERROR] = "上传封面失败 "
+	message[NOT_PRIVILEGES_ERROR] = "无权限 "
+	message[TRANSFORM_TIME_ERROR] = "时间转化错误 "
 }
 
 func MapErrMsg(errcode int32) string {
