@@ -48,7 +48,7 @@ func (l *FavoriteListLogic) FavoriteList(req *types.FavoriteListReq) (resp *type
 
 	var favorites []model.Favorite
 
-	find := l.svcCtx.DB.Where("user_id = ? and cancel = 1", req.UserId).Find(&favorites)
+	find := l.svcCtx.DB.Where("user_id = ? and cancel = 0", req.UserId).Find(&favorites)
 	if find.Error != nil {
 		return &types.FavoriteListResp{
 			Status: types.Status{
@@ -64,9 +64,9 @@ func (l *FavoriteListLogic) FavoriteList(req *types.FavoriteListReq) (resp *type
 		video := new(model.Video)
 		user := new(model.User)
 		follow := new(model.Follow)
-		findA := l.svcCtx.DB.Where("id = ?", fa.VideoID).Find(&video)
-		findB := l.svcCtx.DB.Where("id = ?", video.AuthorID).Find(&user)
-		findC := l.svcCtx.DB.Where("user_id = ? and follow_id", userCliam.Id, video.AuthorID).Find(&follow)
+		findA := l.svcCtx.DB.Where("id = ?", fa.VideoID).Limit(1).Find(&video)
+		findB := l.svcCtx.DB.Where("id = ?", video.AuthorID).Limit(1).Find(&user)
+		findC := l.svcCtx.DB.Where("user_id = ? and follow_id and cancel = 0", userCliam.Id, video.AuthorID).Limit(1).Find(&follow)
 		if findA.Error != nil || findB.Error != nil {
 			return &types.FavoriteListResp{
 				Status: types.Status{

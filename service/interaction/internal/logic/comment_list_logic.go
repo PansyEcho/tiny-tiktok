@@ -47,7 +47,7 @@ func (l *CommentListLogic) CommentList(req *types.CommentListReq) (resp *types.C
 	}
 
 	var comments []*model.Comment
-	tx := l.svcCtx.DB.Where("video_id = ?", req.VideoId).Order("created_at desc").Find(&comments)
+	tx := l.svcCtx.DB.Where("video_id = ? and cancel = 0", req.VideoId).Order("created_at desc").Find(&comments)
 	if tx.Error != nil {
 		return &types.CommentListResp{
 			Status: types.Status{

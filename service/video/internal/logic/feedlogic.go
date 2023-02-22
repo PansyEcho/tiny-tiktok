@@ -43,7 +43,7 @@ func (l *FeedLogic) Feed(req *types.FeedReq) (resp *types.FeedResp, err error) {
 	}
 	var videos []*model.Video
 
-	find := l.svcCtx.DB.Limit(30).Find(&videos)
+	find := l.svcCtx.DB.Order("created_at desc").Limit(30).Find(&videos)
 
 	if find.Error != nil || find.RowsAffected == 0 {
 		return &types.FeedResp{

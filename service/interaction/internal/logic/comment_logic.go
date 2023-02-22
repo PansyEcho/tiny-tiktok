@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"time"
 	"tiny-tiktok/common/errx"
 	"tiny-tiktok/common/utils"
@@ -51,12 +52,22 @@ func (l *CommentLogic) Comment(req *types.CommentReq) (resp *types.CommentResp, 
 		UserID:  userClaim.Id,
 		VideoID: req.VideoId,
 		Content: req.CommentText,
-		Cancel:  1,
+		Cancel:  0,
 	}
 
 	if req.ActionType == 2 {
 		isPriDel := false
-		if req.CommentId == userClaim.Id {
+		commentDel := new(model.Comment)
+		tx := l.svcCtx.DB.Where("id = ? and user_id = ?", req.CommentId, userClaim.Id).Limit(1).Find(&commentDel)
+		if tx.Error != nil {
+			return &types.CommentResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
+		if tx.RowsAffected == 1 {
 			isPriDel = true
 		}
 		if !isPriDel {
@@ -83,7 +94,7 @@ func (l *CommentLogic) Comment(req *types.CommentReq) (resp *types.CommentResp, 
 			}, nil
 		}
 
-		tx := l.svcCtx.DB.Model(&comment).Update("cancel", 1)
+		tx = l.svcCtx.DB.Model(&model.Comment{}).Where("id = ?", req.CommentId).Update("cancel", 1)
 		if tx.Error != nil {
 			return &types.CommentResp{
 				Status: types.Status{
@@ -92,6 +103,23 @@ func (l *CommentLogic) Comment(req *types.CommentReq) (resp *types.CommentResp, 
 				},
 			}, nil
 		}
+		tx = l.svcCtx.DB.Model(&model.Video{}).Where("id = ?", comment.VideoID).UpdateColumn("comment_count", gorm.Expr("comment_count - ?", 1))
+		if tx.Error != nil {
+			return &types.CommentResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
+
+		return &types.CommentResp{
+			Status: types.Status{
+				Status_code: errx.SUCCEED,
+				Status_msg:  errx.MapErrMsg(errx.SUCCEED),
+			},
+		}, nil
+
 	} else {
 		comment.CreateDate = time.Now().Format("01-02")
 		tx := l.svcCtx.DB.Create(&comment)
@@ -103,8 +131,16 @@ func (l *CommentLogic) Comment(req *types.CommentReq) (resp *types.CommentResp, 
 				},
 			}, nil
 		}
+		tx = l.svcCtx.DB.Model(&model.Video{}).Where("id = ?", comment.VideoID).UpdateColumn("comment_count", gorm.Expr("comment_count + ?", 1))
+		if tx.Error != nil {
+			return &types.CommentResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
 	}
-
 	user := new(model.User)
 	tx := l.svcCtx.DB.Where("id = ?", userClaim.Id).Limit(1).Find(&user)
 	if tx.Error != nil || tx.RowsAffected == 0 {

@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"tiny-tiktok/common/errx"
 	"tiny-tiktok/common/utils"
 	"tiny-tiktok/service/interaction/internal/model"
@@ -75,9 +76,45 @@ func (l *FavoriteLogic) Favorite(req *types.FavoriteReq) (resp *types.FavoriteRe
 				},
 			}, nil
 		}
+		tx = l.svcCtx.DB.Model(&model.Video{}).Where("id = ?", favorite.VideoID).UpdateColumn("favorite_count", gorm.Expr("favorite_count - ?", 1))
+		if tx.Error != nil {
+			return &types.FavoriteResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
+		tx = l.svcCtx.DB.Model(&model.User{}).Where("id = ?", userClaim.Id).UpdateColumn("favorite_count", gorm.Expr("favorite_count - ?", 1))
+		if tx.Error != nil {
+			return &types.FavoriteResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
 	} else {
 		tx = l.svcCtx.DB.Create(&favorite)
 		if tx.Error != nil || tx.RowsAffected == 0 {
+			return &types.FavoriteResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
+		tx = l.svcCtx.DB.Model(&model.Video{}).Where("id = ?", favorite.VideoID).UpdateColumn("favorite_count", gorm.Expr("favorite_count + ?", 1))
+		if tx.Error != nil {
+			return &types.FavoriteResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
+		tx = l.svcCtx.DB.Model(&model.User{}).Where("id = ?", userClaim.Id).UpdateColumn("favorite_count", gorm.Expr("favorite_count + ?", 1))
+		if tx.Error != nil {
 			return &types.FavoriteResp{
 				Status: types.Status{
 					Status_code: errx.DB_ERROR,

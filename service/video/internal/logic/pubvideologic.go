@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	"net/http"
 	"time"
 	"tiny-tiktok/common/cos"
@@ -74,6 +75,16 @@ func (l *PubVideoLogic) PubVideo() (resp *types.PublishVideoResp, err error) {
 
 	tx := l.svcCtx.DB.Create(&video)
 
+	if tx.Error != nil || tx.RowsAffected == 0 {
+		return &types.PublishVideoResp{
+			Status: types.Status{
+				Status_code: errx.DB_ERROR,
+				Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+			},
+		}, nil
+	}
+
+	tx = l.svcCtx.DB.Model(&model.User{}).Where("id = ?", userClaim.Id).UpdateColumn("work_count", gorm.Expr("work_count + ?", 1))
 	if tx.Error != nil || tx.RowsAffected == 0 {
 		return &types.PublishVideoResp{
 			Status: types.Status{
