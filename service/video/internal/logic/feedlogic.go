@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"tiny-tiktok/common/errx"
+	"tiny-tiktok/common/utils"
 	"tiny-tiktok/service/video/internal/model"
 	"tiny-tiktok/service/video/internal/svc"
 	"tiny-tiktok/service/video/internal/types"
@@ -25,31 +26,101 @@ func NewFeedLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FeedLogic {
 }
 
 func (l *FeedLogic) Feed(req *types.FeedReq) (resp *types.FeedResp, err error) {
-	// todo: add your logic here and delete this line
-	resp = new(types.FeedResp)
-	resp.Status = types.Status{Status_code: errx.SUCCEED, Status_msg: errx.MapErrMsg(errx.SUCCEED)}
-	resp.NextTime = 1
-	user := types.User{UserID: 1, Username: "shizhen", FollowCount: 1, FollowerCount: 1, IsFollow: false}
-	//video := &types.Video{User: user, PlayURL: "https://v26-web.douyinvod.com/7aa9246f06bfe049c12e9e81d4477198/63e008f8/video/tos/cn/tos-cn-ve-15c001-alinc2/ow0fOAFsjrAMyI35By8DgknaAvA9tfJRhsbwCn/?a=6383&ch=5&cr=3&dr=0&lr=all&cd=0%7C0%7C0%7C3&cv=1&br=1528&bt=1528&cs=0&ds=4&ft=LjhJEL998xbtu4CmD0P5H4eaciDXt_IH85QEeWnW9mPD1Ini&mime_type=video_mp4&qs=0&rc=ZmUzNjUzNWloaDxpNGQ6O0BpajVxbWY6Zjk6aDMzNGkzM0AtXmEzX2M1X2ExMS9jY2EvYSMybDZpcjRnZnNgLS1kLS9zcw%3D%3D&l=202302060252179E2940547C1E1240A668&btag=8000", CoverURL: "", FavoriteCount: 1, CommentCount: 1, IsFavorite: true, Title: "标题A"}
+	token := req.Token
+	userClaim := new(utils.UserClaim)
+	if token == "" {
+		userClaim = &utils.UserClaim{
+			Id:       -11,
+			Username: "",
+		}
+	}
+	userClaim, err = utils.AnalyzeToken(token)
+	if err != nil {
+		userClaim = &utils.UserClaim{
+			Id:       -11,
+			Username: "",
+		}
+	}
+	var videos []*model.Video
 
-	video := new(model.Video)
-	videoResp := new(types.Video)
+	find := l.svcCtx.DB.Limit(30).Find(&videos)
 
-	l.svcCtx.DB.Where("id = 1").Find(&video)
-	videoResp = &types.Video{
-		Id:            video.ID,
-		User:          user,
-		PlayURL:       video.PlayURL,
-		CoverURL:      video.CoverURL,
-		FavoriteCount: video.FavoriteCount,
-		CommentCount:  video.CommentCount,
-		IsFavorite:    true,
-		Title:         video.Title,
+	if find.Error != nil || find.RowsAffected == 0 {
+		return &types.FeedResp{
+			Status: types.Status{
+				Status_code: errx.DB_ERROR,
+				Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+			},
+		}, nil
 	}
 
-	arrVideos := make([]*types.Video, 1)
-	arrVideos[0] = videoResp
-	resp.Video = arrVideos
+	var arrVideos []*types.Video
 
-	return
+	for _, video := range videos {
+		user := new(model.User)
+		tx := l.svcCtx.DB.Where("id = ?", video.AuthorID).Limit(1).Find(&user)
+		if tx.Error != nil || tx.RowsAffected == 0 {
+			return &types.FeedResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
+		follow := new(model.Follow)
+
+		tx = l.svcCtx.DB.Where("user_id = ? and follow_id = ?", userClaim.Id, user.ID).Limit(1).Find(&follow)
+		if tx.Error != nil {
+			return &types.FeedResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
+		favorite := new(model.Favorite)
+		fa := l.svcCtx.DB.Where("user_id = ? and video_id = ? and cancel = 0", userClaim.Id, video.ID).Limit(1).Find(&favorite)
+		if fa.Error != nil {
+			return &types.FeedResp{
+				Status: types.Status{
+					Status_code: errx.DB_ERROR,
+					Status_msg:  errx.MapErrMsg(errx.DB_ERROR),
+				},
+			}, nil
+		}
+
+		videoTemp := &types.Video{
+			Id:            video.ID,
+			PlayURL:       video.PlayURL,
+			CoverURL:      video.CoverURL,
+			FavoriteCount: video.FavoriteCount,
+			CommentCount:  video.CommentCount,
+			IsFavorite:    fa.RowsAffected == 1,
+			Title:         video.Title,
+			User: types.User{
+				UserID:          user.ID,
+				Username:        user.Username,
+				FollowCount:     user.Follow_count,
+				FollowerCount:   user.Follower_count,
+				IsFollow:        tx.RowsAffected == 1,
+				Avatar:          user.Avatar,
+				BackgroundImage: user.BackgroundImage,
+				Signature:       user.Signature,
+				TotalFavorited:  user.TotalFavorited,
+				WorkCount:       user.WorkCount,
+				FavoriteCount:   user.FavoriteCount,
+			},
+		}
+		arrVideos = append(arrVideos, videoTemp)
+
+	}
+
+	return &types.FeedResp{
+		Status: types.Status{
+			Status_code: errx.SUCCEED,
+			Status_msg:  errx.MapErrMsg(errx.SUCCEED),
+		},
+		NextTime: 10,
+		Video:    arrVideos,
+	}, nil
 }

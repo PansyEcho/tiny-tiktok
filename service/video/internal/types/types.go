@@ -7,11 +7,17 @@ type Status struct {
 }
 
 type User struct {
-	UserID        int64  `json:"id"`
-	Username      string `json:"name"`
-	FollowCount   int64  `json:"follow_count"`
-	FollowerCount int64  `json:"follower_count"`
-	IsFollow      bool   `json:"is_follow"`
+	UserID          int64  `json:"id"`
+	Username        string `json:"name"`
+	FollowCount     int64  `json:"follow_count"`
+	FollowerCount   int64  `json:"follower_count"`
+	IsFollow        bool   `json:"is_follow"`
+	Avatar          string `json:"avatar"`
+	BackgroundImage string `json:"background_image"`
+	Signature       string `json:"signature"`
+	TotalFavorited  string `json:"total_favorited"`
+	WorkCount       int    `json:"work_count"`
+	FavoriteCount   int    `json:"favorite_count"`
 }
 
 type Video struct {
@@ -27,7 +33,7 @@ type Video struct {
 
 type FeedReq struct {
 	Token    string `form:"token,optional"`
-	LastTime int64  `form:"last_time,optional"`
+	LastTime int64  `form:"latest_time,optional"`
 }
 
 type FeedResp struct {
@@ -36,11 +42,16 @@ type FeedResp struct {
 	Video    []*Video `json:"video_list,omitempty"`
 }
 
-type PublishVideoReq struct {
-	Token string `form:"token"`
-	Title string `form:"title"`
-}
-
 type PublishVideoResp struct {
 	Status
+}
+
+type GetPubVideoReq struct {
+	Token  string `form:"token"`
+	UserId int64  `form:"user_id"`
+}
+
+type GetPubVideoResp struct {
+	Status
+	VideoPubList []*Video `json:"video_list,omitempty"`
 }
