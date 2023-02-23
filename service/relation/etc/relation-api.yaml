@@ -1,0 +1,7 @@
+Name: relation-api
+Host: 0.0.0.0
+Port: 8888
+
+RedisCacheConf:
+  Host: 43.139.184.22:6379
+  Pass: shi

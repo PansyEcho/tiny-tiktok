@@ -20,6 +20,15 @@ func init() {
 	message[UPLOAD_COVER_ERROR] = "上传封面失败 "
 	message[NOT_PRIVILEGES_ERROR] = "无权限 "
 	message[TRANSFORM_TIME_ERROR] = "时间转化错误 "
+	message[REFOLLOW_ERROR] = "重复关注"
+	message[KAFKAMARSHAL_ERROR] = "kafka序列化寄"
+	message[KAFKASEND_ERROR] = "kafka发送信息寄"
+	message[JSONMASHAL_ERROR] = "json序列化寄"
+	message[KAFKAPUBLISH_ERROR] = "kafka发布寄"
+	message[KAFKAPRODUCER_ERROR] = "kafka生产者寄"
+	message[ACTIONTYPE_ERROR] = "ACTIONTYPE寄"
+	message[UNFOLLOW_ERROR] = "未关注,无法取消"
+	message[RPC_ERROR] = "RPC寄"
 }
 
 func MapErrMsg(errcode int32) string {

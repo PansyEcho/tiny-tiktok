@@ -1,0 +1,10 @@
+Name: relation.rpc
+ListenOn: 0.0.0.0:8080
+Etcd:
+  Hosts:
+  - 43.139.184.22:2379
+  Key: relation.rpc
+RedisCacheConf:
+  Host: 43.139.184.22:6379
+  Pass: shi
+  Type: node
